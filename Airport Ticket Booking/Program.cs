@@ -9,6 +9,9 @@ namespace Airport_Ticket_Booking
         static void Main(string[] args)
         {   // TODO ...
             // all code until now just to test , it will be updated soon 
+            //string flightsFilePath = "C:\\Users\\wasim\\OneDrive\\Desktop\\C# project\\Airport Ticket Booking\\Flights.csv";
+            //var flights = CSVRepo.LoadDataFromCSVFile<Flight>(flightsFilePath);
+            //flights.Print("Flights");
 
             string userFilePath = "C:\\Users\\wasim\\OneDrive\\Desktop\\C# project\\Airport Ticket Booking\\Users.csv";
             var Users = CSVRepo.LoadDataFromCSVFile<User>(userFilePath);
@@ -16,10 +19,10 @@ namespace Airport_Ticket_Booking
             while (true)
             {
                 Console.Write("Enter your username: ");
-                string inputUsername = Console.ReadLine();
+                string? inputUsername = Console.ReadLine();
 
                 Console.Write("Enter your password: ");
-                string inputPassword = Console.ReadLine();
+                string? inputPassword = Console.ReadLine();
 
                 user = Users.SingleOrDefault(x=>x.UserName == inputUsername && x.UserPassword == inputPassword);
 
@@ -36,10 +39,6 @@ namespace Airport_Ticket_Booking
                 Console.WriteLine("Wrong UserName Or Password");
             }
 
-
-
-
-            Console.ReadKey();
         }
         static void MangerMenu(Manager manager)
         {
@@ -49,7 +48,7 @@ namespace Airport_Ticket_Booking
         {
             string BookingsFilePath = "C:\\Users\\wasim\\OneDrive\\Desktop\\C# project\\Airport Ticket Booking\\Bookings.csv";
 
-            var bookings = CSVRepo.LoadDataFromCSVFile<Booking>(BookingsFilePath);
+            List<Booking> bookings = CSVRepo.LoadDataFromCSVFile<Booking>(BookingsFilePath);
 
             passenger.Bookings = bookings.Where(x => x.PassengerUserName == passenger.UserName).ToList();
 
@@ -64,7 +63,7 @@ namespace Airport_Ticket_Booking
                 Console.WriteLine("6- Logout");
                 Console.Write("Please select an option (1-7): ");
 
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
 
                 switch (input)
                 {
@@ -75,10 +74,21 @@ namespace Airport_Ticket_Booking
                         //TODo...
                         break;
                     case "3":
-                        //TODo...
+                        Booking? removedBooking;
+                        if (CancelBooking(passenger,out removedBooking))
+                        {   
+                            bookings.Remove(removedBooking!);
+                            CSVRepo.SaveDataToCSVFile(BookingsFilePath, bookings);
+                        }
                         break;
                     case "4":
-                        //TODo...
+                        Booking? modifiedBooking;
+                        if (ModifyBooking(passenger, out modifiedBooking))
+                        {
+                            var preUpdateBook = bookings.Single(x => x.BookingId == modifiedBooking!.BookingId);
+                            preUpdateBook = modifiedBooking!;
+                            CSVRepo.SaveDataToCSVFile(BookingsFilePath, bookings);
+                        }
                         break;
                     case "5":
                         passenger.Bookings.Print("Your Bookings");
@@ -93,5 +103,68 @@ namespace Airport_Ticket_Booking
                 Console.WriteLine();
             }
         }
+        static bool CancelBooking(Passenger passenger,out Booking? removedBooking)
+        {
+            Console.Write("Enter the Booking ID you want to cancel: ");
+            var bookingId = Console.ReadLine();
+                
+            var booking = passenger.Bookings.SingleOrDefault(x => x.BookingId == bookingId);
+
+            if (booking is null)
+            {
+                Console.WriteLine("Invalid Booking ID");
+                removedBooking = null;
+                return false;
+            }
+            removedBooking = booking!;
+            passenger.Bookings.Remove(booking);
+            return true;
+        }
+        static bool ModifyBooking(Passenger passenger,out Booking? modifiedBooking)
+        {
+            Console.Write("Enter the Booking ID you want to modify: ");
+            var bookingId = Console.ReadLine();
+
+            var booking = passenger.Bookings.SingleOrDefault(x => x.BookingId == bookingId);
+
+            if (booking is null)
+            {
+                Console.WriteLine("Invalid Booking ID");
+                modifiedBooking = null;
+                return false;
+            }
+
+            Console.Write("Enter the new Class {Economy,Business,First Class}: ");
+            string? newClass = Console.ReadLine();
+
+            if (!Enum.IsDefined(typeof(Class), newClass?.Replace(" ", "")!))
+            {
+                Console.WriteLine("Invalid Class");
+                modifiedBooking = null;
+                return false;
+            }
+
+            booking.Price = CalculatePrice(booking.Class, newClass!, booking.Price);
+            booking.Class = $"{newClass}";
+            modifiedBooking = booking!;
+
+            return true;
+
+        }
+
+        private static double CalculatePrice(string CurrentClass, string newClass, double price)
+        {
+            price /= (int)Enum.Parse(typeof(Class), CurrentClass.Replace(" ",""));
+            price *= (int)Enum.Parse(typeof(Class), newClass.Replace(" ", ""));
+            return price;
+        }
+
+        enum Class
+        {
+            Economy = 1,
+            Business  = 2,
+            FirstClass = 3
+        }
+
     }
 }
