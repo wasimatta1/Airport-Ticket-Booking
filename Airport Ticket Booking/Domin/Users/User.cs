@@ -1,9 +1,4 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Airport_Ticket_Booking.Domin.Users
 {
@@ -19,6 +14,11 @@ namespace Airport_Ticket_Booking.Domin.Users
         public string LastName { get; set; }
         [Name("Role")]
         public string Role { get; set; }
-
+        public override string ToString()
+        {
+            return $"First Name: {FirstName}\n" +
+                   $"Last Name: {LastName}\n" +
+                   $"Role: {Role}";
+        }
     }
 }
