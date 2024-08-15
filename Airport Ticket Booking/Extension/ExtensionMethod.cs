@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-
-namespace Airport_Ticket_Booking.Domin.Extension
+namespace Airport_Ticket_Booking.Extension
 {
     public static class ExtensionMethod
     {
@@ -72,7 +71,5 @@ namespace Airport_Ticket_Booking.Domin.Extension
             LessThanOrEqual,
             NotEqual
         }
-
-
     }
 }

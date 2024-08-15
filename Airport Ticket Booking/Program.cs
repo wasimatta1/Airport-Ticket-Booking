@@ -1,8 +1,8 @@
-﻿using Airport_Ticket_Booking.Domin.Base;
-using Airport_Ticket_Booking.Domin.CSV;
-using Airport_Ticket_Booking.Domin.Extension;
+﻿using Airport_Ticket_Booking.CSV;
+using Airport_Ticket_Booking.Domin.Base;
 using Airport_Ticket_Booking.Domin.Users;
-using static Airport_Ticket_Booking.Domin.Extension.ExtensionMethod;
+using Airport_Ticket_Booking.Extension;
+using static Airport_Ticket_Booking.Extension.ExtensionMethod;
 
 namespace Airport_Ticket_Booking
 {
@@ -41,7 +41,52 @@ namespace Airport_Ticket_Booking
         }
         static void MangerMenu(Manager manager)
         {
-            //ToDo....
+
+            List<Booking> bookings = CSVRepo.LoadDataFromCSVFile<Booking>($"{FilePath}Bookings.csv");
+
+            IEnumerable<Booking>? filteredbookings = bookings; // Default value All bookings
+
+            while (true)
+            {
+                Console.WriteLine("=== Manger Menu ===");
+                Console.WriteLine("1- Filter Bookings");
+                Console.WriteLine("2- Batch Flight Upload");
+                Console.WriteLine("3- Validate Imported Flight Data");
+                Console.WriteLine("4- Dynamic Model Validation Details");
+                Console.WriteLine("5- Logout");
+                Console.Write("Please select an option (1-6): ");
+
+                string? input = Console.ReadLine();
+                switch (input)
+                {
+                    case "1":
+                        var filters = GetFilters(true);
+                        if (filters.Count == 0)
+                            filteredbookings = bookings;
+                        else
+                            filteredbookings = bookings.Filter(filters);
+
+                        filteredbookings?.Print("Available Bookings");
+
+                        break;
+                    case "2":
+                        flights = CSVRepo.LoadDataFromCSVFile<Flight>($"{FilePath}Flights.csv");
+                        flights?.Print("Flights");
+                        break;
+                    case "3":
+
+                        break;
+                    case "4":
+
+                    case "5":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid option, please try again.");
+                        break;
+                }
+
+                Console.WriteLine();
+            }
         }
         static void PassengerMenu(Passenger passenger)
         {
@@ -225,12 +270,10 @@ namespace Airport_Ticket_Booking
                 {
                     switch (operationChoice)
                     {
-                        case "2":
                         case "3":
+                        case "4":
                         case "5":
                         case "6":
-                        case "7":
-                        case "8":
                             Console.WriteLine("Invalid operation selected, please try again.");
                             continue;
                     }
@@ -368,14 +411,13 @@ namespace Airport_Ticket_Booking
             price *= (int)Enum.Parse(typeof(Class), newClass.Replace(" ", ""));
             return price;
         }
-
-
-        enum Class
+        public enum Class
         {
             Economy = 1,
-            Business  = 2,
+            Business = 2,
             FirstClass = 3
         }
+
 
     }
 }
