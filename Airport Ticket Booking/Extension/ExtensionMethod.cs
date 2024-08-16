@@ -1,10 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using Airport_Ticket_Booking.Domin;
+using System.Linq.Expressions;
 
 namespace Airport_Ticket_Booking.Extension
 {
     public static class ExtensionMethod
     {
-        public static IEnumerable<T>? Filter<T>(this IEnumerable<T> input, Dictionary<string, (FilterOperator, object)> filters)
+        public static IEnumerable<T>? Filter<T>(this IEnumerable<T> input, Dictionary<string, (Enums.FilterOperator, object)> filters)
         {
             if (input is null || filters is null || filters.Count == 0)
                 return null;
@@ -19,22 +20,22 @@ namespace Airport_Ticket_Booking.Extension
                 Expression? condition = null;
                 switch (filterOperator)
                 {
-                    case FilterOperator.Equals:
+                    case Enums.FilterOperator.Equals:
                         condition = Expression.Equal(member, value);
                         break;
-                    case FilterOperator.GreaterThan:
+                    case Enums.FilterOperator.GreaterThan:
                         condition = Expression.GreaterThan(member, value);
                         break;
-                    case FilterOperator.LessThan:
+                    case Enums.FilterOperator.LessThan:
                         condition = Expression.LessThan(member, value);
                         break;
-                    case FilterOperator.GreaterThanOrEqual:
+                    case Enums.FilterOperator.GreaterThanOrEqual:
                         condition = Expression.GreaterThanOrEqual(member, value);
                         break;
-                    case FilterOperator.LessThanOrEqual:
+                    case Enums.FilterOperator.LessThanOrEqual:
                         condition = Expression.LessThanOrEqual(member, value);
                         break;
-                    case FilterOperator.NotEqual:
+                    case Enums.FilterOperator.NotEqual:
                         condition = Expression.NotEqual(member, value);
                         break;
                 }
@@ -62,14 +63,15 @@ namespace Airport_Ticket_Booking.Extension
 
             }
         }
-        public enum FilterOperator
+        public static void SaveInFile<T>(this IEnumerable<T> source , string fileName)
         {
-            Equals,
-            GreaterThan,
-            LessThan,
-            GreaterThanOrEqual,
-            LessThanOrEqual,
-            NotEqual
+            string path = $"C:\\Users\\wasim\\OneDrive\\Desktop\\C# project\\Airport Ticket Booking\\{fileName}";
+
+            var lines = source.Select(x => x?.ToString()).ToArray();
+
+            File.WriteAllLines(path, lines); 
+          
+
         }
     }
 }

@@ -1,0 +1,5 @@
+FlightId in Flight: {FL001}  : "Value is not unique"
+ArrivalAirport in Flight: {FL003}  : "Value or Class is not valid"
+Class in Flight: {FL004}  : "Value or Class is not valid"
+Price in Flight: {FL005}  : "Value is not valid must have a positive value greater than zero"
+DepartureDate in Flight: {FL005}  : "Value is not valid, Allowed Range (today → future)"

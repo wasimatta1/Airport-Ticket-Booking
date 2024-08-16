@@ -1,12 +1,15 @@
 ﻿using Airport_Ticket_Booking.CSV;
+using Airport_Ticket_Booking.CustomAttributes;
 using Airport_Ticket_Booking.Domin.Base;
 using Airport_Ticket_Booking.Domin.Users;
+using Airport_Ticket_Booking.Domin;
 using Airport_Ticket_Booking.Extension;
+using System.Reflection;
 using static Airport_Ticket_Booking.Extension.ExtensionMethod;
 
 namespace Airport_Ticket_Booking
 {
-    internal class Program
+    public class Program
     {
         static string FilePath = @"C:\Users\wasim\OneDrive\Desktop\C# project\Airport Ticket Booking\";
 
@@ -52,7 +55,7 @@ namespace Airport_Ticket_Booking
                 Console.WriteLine("1- Filter Bookings");
                 Console.WriteLine("2- Batch Flight Upload");
                 Console.WriteLine("3- Validate Imported Flight Data");
-                Console.WriteLine("4- Dynamic Model Validation Details");
+                Console.WriteLine("4- Validation Details");
                 Console.WriteLine("5- Logout");
                 Console.Write("Please select an option (1-6): ");
 
@@ -74,10 +77,21 @@ namespace Airport_Ticket_Booking
                         flights?.Print("Flights");
                         break;
                     case "3":
-
+                        List<Error> errors = ValidateImportedFlightData();
+                        if (errors.Count > 0)
+                        {
+                            errors.Print("Errors");
+                            errors.SaveInFile("Errors Details.txt");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No Errors Found Flights Updated");
+                            CSVRepo.SaveDataToCSVFile($"{FilePath}Passenger Flights.csv", flights!);
+                        }
                         break;
                     case "4":
-
+                        ValidationDetails();
+                        break;
                     case "5":
                         return;
                     default:
@@ -88,9 +102,100 @@ namespace Airport_Ticket_Booking
                 Console.WriteLine();
             }
         }
+
+        private static void ValidationDetails()
+        {
+            List<string> details = new List<string>();
+            var flights = new Flight();
+            var properties = flights.GetType().GetProperties();
+
+            foreach (var property in properties)
+            {
+                var attributes = property.GetCustomAttributes();
+
+                foreach (var attribute in attributes)
+                {
+
+                    if (attribute is RangeAttribute<double> rangeAttributeDouble)
+                    {
+                        details.Add(rangeAttributeDouble.ToString());
+                    }
+                    else if (attribute is DateTimeRangeAttribute rangeAttributeDateTime)
+                    {
+                        details.Add(rangeAttributeDateTime.ToString());
+                    }
+                    else if (attribute is TextValidationAttribute textValidationAttribute)
+                    {
+                        details.Add(textValidationAttribute.ToString());
+                    }
+                    else if (attribute is UniqueIdAttribute unique)
+                    {
+                        details.Add(unique.ToString());
+                    }
+                }
+            }
+            details.Print("Validation Details");
+        }
+
+        private static List<Error> ValidateImportedFlightData()
+        {
+            List<Error> error = new List<Error>();
+            if(flights is null)
+            {
+                Console.WriteLine("No Flights to validate");
+                return error;
+            }
+
+            foreach (var flight in flights)
+            {
+                var properties = flight.GetType().GetProperties();
+
+                foreach (var property in properties)
+                {
+                   var attributes = property.GetCustomAttributes();
+
+                    foreach (var attribute in attributes)
+                    {
+
+                        if (attribute is RangeAttribute<double> rangeAttributeDouble)
+                        {
+                            if (!rangeAttributeDouble.IsValid((double)property.GetValue(flight)))
+                            {
+                                error.Add(new Error(property.Name, flight.FlightId, $"Value is not valid must have a positive value greater than zero"));
+                            }
+                        }
+                        else if (attribute is DateTimeRangeAttribute rangeAttributeDateTime)
+                        {
+                            if (!rangeAttributeDateTime.IsValid((DateTime)property.GetValue(flight)))
+                            {
+                                error.Add(new Error(property.Name, flight.FlightId, $"Value is not valid, Allowed Range (today → future)"));
+                            }
+                        }
+                        else if (attribute is TextValidationAttribute textValidationAttribute)
+                        {
+                            if (!textValidationAttribute.IsValid((string)property.GetValue(flight)))
+                            {
+
+                                error.Add(new Error(property.Name, flight.FlightId, $"Value or Class is not valid"));
+                            }
+                        }
+                        else if (attribute is UniqueIdAttribute unique)
+                        {
+                            if (!unique.AddAndCheckIfUnique((string)property.GetValue(flight)))
+                            {
+                                error.Add(new Error(property.Name, flight.FlightId, $"Value is not unique"));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return error;
+        }
+
         static void PassengerMenu(Passenger passenger)
         {
-            flights = CSVRepo.LoadDataFromCSVFile<Flight>($"{FilePath}Flights.csv");
+            flights = CSVRepo.LoadDataFromCSVFile<Flight>($"{FilePath}Passenger Flights.csv");
 
             List<Booking> bookings = CSVRepo.LoadDataFromCSVFile<Booking>($"{FilePath}Bookings.csv");
 
@@ -187,7 +292,7 @@ namespace Airport_Ticket_Booking
             string? flightClass = Console.ReadLine();
 
 
-            if (!Enum.IsDefined(typeof(Class), flightClass?.Replace(" ", "")!))
+            if (!Enum.IsDefined(typeof(Enums.Class), flightClass?.Replace(" ", "")!))
             {
                 Console.WriteLine("Invalid Class");
                 return null;
@@ -211,9 +316,9 @@ namespace Airport_Ticket_Booking
             return NewBook;
         }
 
-        private static Dictionary<string, (FilterOperator, object)> GetFilters(bool isManger)
+        private static Dictionary<string, (Enums.FilterOperator, object)> GetFilters(bool isManger)
         {
-            var filters = new Dictionary<string, (FilterOperator, object)>();
+            var filters = new Dictionary<string, (Enums.FilterOperator, object)>();
 
             while (true)
             {
@@ -279,27 +384,27 @@ namespace Airport_Ticket_Booking
                     }
                 }
 
-                FilterOperator filterOperator = FilterOperator.Equals; 
+                Enums.FilterOperator filterOperator = Enums.FilterOperator.Equals; 
 
                 switch (operationChoice)
                 {
                     case "1":
-                        filterOperator = FilterOperator.Equals;
+                        filterOperator = Enums.FilterOperator.Equals;
                         break;
                     case "2":
-                        filterOperator = FilterOperator.NotEqual;
+                        filterOperator = Enums.FilterOperator.NotEqual;
                         break;
                     case "3":
-                        filterOperator = FilterOperator.LessThan;
+                        filterOperator = Enums.FilterOperator.LessThan;
                         break;
                     case "4":
-                        filterOperator = FilterOperator.GreaterThanOrEqual;
+                        filterOperator = Enums.FilterOperator.GreaterThanOrEqual;
                         break;
                     case "5":
-                        filterOperator = FilterOperator.LessThanOrEqual;
+                        filterOperator = Enums.FilterOperator.LessThanOrEqual;
                         break;
                     case "6":
-                        filterOperator = FilterOperator.GreaterThan;
+                        filterOperator = Enums.FilterOperator.GreaterThan;
                         break;
                     default:
                         Console.WriteLine("Invalid operation selected, please try again.");
@@ -390,7 +495,7 @@ namespace Airport_Ticket_Booking
             Console.Write("Enter the new Class {Economy,Business,First Class}: ");
             string? newClass = Console.ReadLine();
 
-            if (!Enum.IsDefined(typeof(Class), newClass?.Replace(" ", "")!))
+            if (!Enum.IsDefined(typeof(Enums.Class), newClass?.Replace(" ", "")!))
             {
                 Console.WriteLine("Invalid Class");
                 modifiedBooking = null;
@@ -407,16 +512,11 @@ namespace Airport_Ticket_Booking
 
         private static double CalculatePrice(string CurrentClass, string newClass, double price)
         {
-            price /= (int)Enum.Parse(typeof(Class), CurrentClass.Replace(" ",""));
-            price *= (int)Enum.Parse(typeof(Class), newClass.Replace(" ", ""));
+            price /= (int)Enum.Parse(typeof(Enums.Class), CurrentClass.Replace(" ",""));
+            price *= (int)Enum.Parse(typeof(Enums.Class), newClass.Replace(" ", ""));
             return price;
         }
-        public enum Class
-        {
-            Economy = 1,
-            Business = 2,
-            FirstClass = 3
-        }
+
 
 
     }
