@@ -9,7 +9,7 @@ namespace Airport_Ticket_Booking.Extension
         {
             if (input is null || filters is null || filters.Count == 0)
                 return null;
-
+            input = input.AsQueryable();
             foreach (var filter in filters)
             {
                 var filterOperator = filter.Value.Item1;

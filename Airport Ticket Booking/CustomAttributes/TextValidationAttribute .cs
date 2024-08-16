@@ -1,6 +1,5 @@
 ﻿
 using Airport_Ticket_Booking.Domin;
-using static Airport_Ticket_Booking.Program;
 
 namespace Airport_Ticket_Booking.CustomAttributes
 {
@@ -46,6 +45,8 @@ namespace Airport_Ticket_Booking.CustomAttributes
                     return false;
                 }
             }
+            if (string.IsNullOrWhiteSpace(value)) return true;
+
             if (MaxLength != 0 && value.Length > MaxLength)
             {
                 return false;
