@@ -1,0 +1,6 @@
+Flight ID,Price,Departure Country,Destination Country,Departure Date,Departure Airport,Arrival Airport,Class
+FL001,299.99,Palestine,United States,2024-09-15,Ramallah Airport,JFK Airport,Economy
+FL001,499.99,Palestine,United Kingdom,2024-09-20,Ramallah Airport,Heathrow Airport,Economy
+FL003,199.99,Palestine,Jordan,2024-09-10,Ramallah Airport,,Economy
+FL004,899.99,Palestine,Australia,2024-10-05,Ramallah Airport,Sydney Airport,Ec
+FL005,-500,Palestine,Canada,2023-09-25,Ramallah Airport,Toronto Pearson Airport,Economy

@@ -1,0 +1,7 @@
+Booking ID,Passenger UserName,Flight ID,Price,Departure Country,Destination Country,Departure Date,Departure Airport,Arrival Airport,Class
+BK001,wasim,AA123,299.99,Palestine,United States,08/23/2024 00:00:00,Ramallah Airport,JFK Airport,Economy
+BK002,wasim,BA789,225,Palestine,United Kingdom,08/25/2024 00:00:00,Ramallah Airport,Heathrow Airport,First Class
+BK003,wasim,UA456,1199.98,Palestine,Canada,09/01/2024 00:00:00,Ramallah Airport,Toronto Pearson Airport,Business
+BK004,ali,UA456,599.99,Palestine,Canada,09/01/2024 00:00:00,Ramallah Airport,Toronto Pearson Airport,First Class
+BK005,ali,DL321,300,Palestine,Germany,09/05/2024 00:00:00,Ramallah Airport,Frankfurt Airport,Economy
+b6bc641d-eacd-436a-bc73-b99864474f6f,wasim,FL005,1199.97,Palestine,Canada,09/25/2024 00:00:00,Ramallah Airport,Toronto Pearson Airport,First Class
